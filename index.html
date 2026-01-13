@@ -3,29 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NGL Generator - உங்களின் சொந்த லிங்க்கை உருவாக்குங்கள்</title>
+    <title>NGL Link Generator</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #000; color: white; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .container { text-align: center; background: rgba(255,255,255,0.1); padding: 40px 20px; border-radius: 30px; width: 90%; max-width: 400px; backdrop-filter: blur(10px); }
-        input { width: 100%; padding: 15px; border-radius: 15px; border: none; margin: 20px 0; font-size: 16px; text-align: center; }
-        button { background: #ff0050; color: white; border: none; padding: 15px 30px; border-radius: 50px; font-weight: bold; cursor: pointer; width: 100%; font-size: 18px; }
-        #link-display { margin-top: 20px; background: #222; padding: 15px; border-radius: 10px; display: none; word-break: break-all; }
-        .copy-btn { background: #0095f6; margin-top: 10px; font-size: 14px; }
+        .container { text-align: center; background: rgba(255,255,255,0.1); padding: 40px 20px; border-radius: 30px; width: 90%; max-width: 400px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        input { width: 100%; padding: 15px; border-radius: 15px; border: none; margin: 20px 0; font-size: 16px; text-align: center; outline: none; }
+        button { background: #ff0050; color: white; border: none; padding: 15px; border-radius: 50px; font-weight: bold; cursor: pointer; width: 100%; font-size: 18px; transition: 0.3s; }
+        #link-display { margin-top: 20px; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 15px; display: none; word-break: break-all; }
+        .btn-copy { background: #0095f6; margin-top: 10px; font-size: 14px; padding: 10px; }
+        .btn-admin { background: #333; margin-top: 10px; font-size: 14px; padding: 10px; text-decoration: none; display: block; color: white; border-radius: 50px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>NGL Link Generator 🚀</h1>
-        <p>உங்கள் Instagram ID-ஐ உள்ளிட்டு உங்கள் சொந்த அனானிமஸ் லிங்க்கை பெறுங்கள்!</p>
-        <input type="text" id="username" placeholder="Enter Instagram ID">
+        <h1>NGL Generator 🚀</h1>
+        <p>உங்கள் Insta ID-ஐ உள்ளிட்டு சொந்த லிங்க்கை உருவாக்குங்கள்!</p>
+        <input type="text" id="username" placeholder="Enter Instagram Username">
         <button onclick="generateLink()">லிங்க் உருவாக்கு!</button>
 
         <div id="link-display">
-            <p style="font-size: 12px; color: #aaa;">உங்கள் லிங்க் இதோ:</p>
-            <strong id="my-link"></strong><br>
-            <button class="copy-btn" onclick="copyLink()">Copy Link</button>
-            <p style="font-size: 12px; color: #ff0050; margin-top: 10px;">இந்த லிங்கை உங்கள் பயோவில் (Bio) வையுங்கள்!</p>
-            <a id="admin-link" href="#" style="color: #0095f6; font-size: 13px; text-decoration: none;">உங்கள் Inbox-ஐப் பார்க்க இங்கே கிளிக் செய்யவும்</a>
+            <p style="font-size: 12px; color: #aaa;">இது உங்கள் ரகசிய மெசேஜ் லிங்க்:</p>
+            <strong id="my-link" style="color: #ff0050;"></strong><br>
+            <button class="btn-copy" onclick="copyLink()">Copy Link 📋</button>
+            <hr style="margin: 20px 0; border: 0; border-top: 1px solid #444;">
+            <a id="admin-link" href="#" class="btn-admin">உங்கள் இன்பாக்ஸ் பார்க்க 📥</a>
         </div>
     </div>
 
@@ -34,21 +35,20 @@
             const user = document.getElementById('username').value.trim();
             if(user) {
                 const baseUrl = window.location.href.split('index.html')[0];
-                const fullLink = `${baseUrl}send.html?u=${user}`;
-                const adminLink = `${baseUrl}admin.html?u=${user}`;
+                const fullLink = baseUrl + "send.html?u=" + user;
+                const adminLink = baseUrl + "admin.html?u=" + user;
                 
                 document.getElementById('my-link').innerText = fullLink;
                 document.getElementById('admin-link').href = adminLink;
                 document.getElementById('link-display').style.display = 'block';
             } else {
-                alert("தயவுசெய்து ID-ஐ உள்ளிடவும்");
+                alert("Please enter ID");
             }
         }
-
         function copyLink() {
             const link = document.getElementById('my-link').innerText;
             navigator.clipboard.writeText(link);
-            alert("லிங்க் காப்பி செய்யப்பட்டது! ✅");
+            alert("Copied! ✅");
         }
     </script>
 </body>
