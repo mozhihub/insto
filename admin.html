@@ -3,62 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inbox - Admin Pro</title>
+    <title>Admin Inbox</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
         body { background: #111; color: #fff; font-family: sans-serif; padding: 20px; }
-        .nav { max-width: 500px; margin: auto; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .grid { max-width: 500px; margin: auto; }
-        .story-card { background: linear-gradient(135deg, #ff0050, #ff00c8); border-radius: 20px; padding: 20px; margin-bottom: 20px; position: relative; box-shadow: 0 10px 20px rgba(255, 0, 80, 0.2); }
-        .header { display: flex; align-items: center; margin-bottom: 15px; }
-        .header img { width: 40px; height: 40px; border-radius: 50%; border: 2px solid white; margin-right: 10px; }
-        .msg-text { font-size: 18px; font-weight: bold; line-height: 1.4; color: white; margin-bottom: 20px; }
-        .meta { display: flex; justify-content: space-between; font-size: 10px; color: rgba(255,255,255,0.7); }
-        .btn-del { background: rgba(0,0,0,0.3); border: none; color: white; padding: 5px 10px; border-radius: 10px; cursor: pointer; }
+        .nav { max-width: 500px; margin: auto; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .story-card { background: linear-gradient(135deg, #ff0050, #ff00c8); border-radius: 20px; padding: 20px; margin: 15px auto; max-width: 500px; box-shadow: 0 10px 20px rgba(255, 0, 80, 0.2); }
+        .msg-text { font-size: 20px; font-weight: bold; margin-bottom: 15px; }
+        .btn-del { background: rgba(0,0,0,0.3); border: none; color: white; padding: 5px 10px; border-radius: 10px; cursor: pointer; float: right; }
     </style>
 </head>
 <body>
     <div class="nav">
-        <h2>Inbox 📥 <small id="count"></small></h2>
+        <h2 id="title">Inbox</h2>
         <a href="index.html" style="color:#0095f6; text-decoration:none;">Back</a>
     </div>
-    <div class="grid" id="list"></div>
+    <div id="list"></div>
 
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyBLyf_dz6xPC9wdthZSVtpatkc8JgFhE4Q",
-            databaseURL: "https://chatbox-chats-default-rtdb.firebaseio.com",
+            databaseURL: "https://chatbox-chats-default-rtdb.firebaseio.com"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        db.ref('messages').on('value', snap => {
-            const list = document.getElementById('list');
-            const data = snap.val();
-            list.innerHTML = "";
-            if(data) {
-                const keys = Object.keys(data).reverse();
-                document.getElementById('count').innerText = keys.length;
-                keys.forEach(k => {
-                    const m = data[k];
-                    const img = m.user === "Anonymous" ? "https://cdn-icons-png.flaticon.com/512/149/149071.png" : `https://unavatar.io/instagram/${m.user}`;
-                    list.innerHTML += `
-                        <div class="story-card">
-                            <div class="header">
-                                <img src="${img}">
-                                <span>@${m.user} sent you a message!</span>
-                            </div>
-                            <div class="msg-text">"${m.text}"</div>
-                            <div class="meta">
-                                <span>${new Date(m.timestamp).toLocaleTimeString()}</span>
-                                <button class="btn-del" onclick="deleteMsg('${k}')">Remove</button>
-                            </div>
-                        </div>`;
-                });
-            }
-        });
-        function deleteMsg(k) { if(confirm("Delete?")) db.ref('messages/'+k).remove(); }
+        const params = new URLSearchParams(window.location.search);
+        const user = params.get('u');
+
+        if(user) {
+            document.getElementById('title').innerText = `@${user}'s Inbox`;
+            db.ref('users/' + user + '/messages').on('value', snap => {
+                const list = document.getElementById('list');
+                const data = snap.val();
+                list.innerHTML = "";
+                if(data) {
+                    Object.keys(data).reverse().forEach(k => {
+                        list.innerHTML += `
+                            <div class="story-card">
+                                <button class="btn-del" onclick="deleteMsg('${k}')">Delete</button>
+                                <div class="msg-text">"${data[k].text}"</div>
+                                <div style="font-size:10px; opacity:0.7;">${new Date(data[k].timestamp).toLocaleString()}</div>
+                            </div>`;
+                    });
+                } else {
+                    list.innerHTML = "<p style='text-align:center;'>No messages yet.</p>";
+                }
+            });
+        }
+
+        function deleteMsg(k) { if(confirm("Delete?")) db.ref('users/'+user+'/messages/'+k).remove(); }
     </script>
 </body>
 </html>
