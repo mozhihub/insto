@@ -6,37 +6,33 @@
     <title>NGL Pro Generator</title>
     <style>
         :root { --primary: #ff0050; --secondary: #0095f6; --bg: #000; }
-        body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: white; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
-        .container { text-align: center; background: linear-gradient(145deg, #1a1a1a, #000); padding: 40px 25px; border-radius: 40px; width: 90%; max-width: 420px; border: 1px solid #333; box-shadow: 0 20px 50px rgba(255,0,80,0.1); }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+        .container { text-align: center; background: #111; padding: 40px 25px; border-radius: 40px; width: 90%; max-width: 420px; border: 1px solid #333; box-shadow: 0 20px 50px rgba(255,0,80,0.2); }
         h1 { font-size: 2.5rem; margin-bottom: 10px; background: linear-gradient(to right, #ff0050, #ff00c8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        input { width: 100%; padding: 18px; border-radius: 20px; border: 2px solid #333; margin: 20px 0; font-size: 16px; text-align: center; outline: none; background: #111; color: #fff; transition: 0.3s; box-sizing: border-box; }
-        input:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(255,0,80,0.3); }
-        .btn-gen { background: var(--primary); color: white; border: none; padding: 18px; border-radius: 50px; font-weight: bold; cursor: pointer; width: 100%; font-size: 18px; box-shadow: 0 10px 20px rgba(255,0,80,0.3); }
-        
-        #link-display { margin-top: 30px; display: none; animation: fadeIn 0.5s; }
-        .profile-preview { width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--primary); margin-bottom: 15px; object-fit: cover; }
-        .link-box { background: #111; padding: 15px; border-radius: 15px; border: 1px dashed #444; word-break: break-all; margin: 15px 0; font-family: monospace; color: #00ff88; }
+        input { width: 100%; padding: 18px; border-radius: 20px; border: 2px solid #333; margin: 20px 0; font-size: 16px; text-align: center; outline: none; background: #000; color: #fff; box-sizing: border-box; }
+        input:focus { border-color: var(--primary); }
+        .btn-gen { background: var(--primary); color: white; border: none; padding: 18px; border-radius: 50px; font-weight: bold; cursor: pointer; width: 100%; font-size: 18px; }
+        #link-display { margin-top: 30px; display: none; }
+        .profile-preview { width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--primary); margin-bottom: 15px; object-fit: cover; background: #222; }
+        .link-box { background: #1a1a1a; padding: 15px; border-radius: 15px; border: 1px dashed #444; word-break: break-all; margin: 15px 0; color: #00ff88; font-size: 14px; }
         .action-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .btn-copy { background: #333; color: white; border: none; padding: 12px; border-radius: 50px; cursor: pointer; }
-        .btn-share { background: var(--secondary); color: white; border: none; padding: 12px; border-radius: 50px; cursor: pointer; }
+        .btn-share { background: #25D366; color: white; border: none; padding: 12px; border-radius: 50px; cursor: pointer; }
         .btn-admin { background: #fff; color: #000; margin-top: 15px; text-decoration: none; display: block; padding: 12px; border-radius: 50px; font-weight: bold; }
-        
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>NGL PRO 🚀</h1>
-        <p style="color: #888;">அனானிமஸ் மெசேஜ் பெற உங்கள் ஐடியை உள்ளிடவும்</p>
-        <input type="text" id="username" placeholder="@instagram_id" oninput="updatePreview()">
-        <img id="preview-img" class="profile-preview" src="https://unavatar.io/instagram/placeholder" style="display:none;">
+        <div id="p-wrap" style="display:none;"><img id="preview-img" class="profile-preview" src=""></div>
+        <input type="text" id="username" placeholder="Instagram Username" oninput="updatePreview()">
         <button class="btn-gen" onclick="generateLink()">லிங்க் உருவாக்கு!</button>
 
         <div id="link-display">
             <div class="link-box" id="my-link"></div>
             <div class="action-btns">
                 <button class="btn-copy" onclick="copyLink()">Copy 📋</button>
-                <button class="btn-share" onclick="shareLink()">Share 📤</button>
+                <button class="btn-share" onclick="shareWA()">WhatsApp 🟢</button>
             </div>
             <a id="admin-link" href="#" class="btn-admin">இன்பாக்ஸ் திற (Inbox) 📥</a>
         </div>
@@ -46,23 +42,28 @@
         function updatePreview() {
             const user = document.getElementById('username').value.trim();
             const img = document.getElementById('preview-img');
-            if(user.length > 2) {
-                img.src = `https://unavatar.io/instagram/${user}`;
-                img.style.display = 'inline-block';
+            const wrap = document.getElementById('p-wrap');
+            if(user.length > 1) {
+                img.src = `https://unavatar.io/instagram/${user.replace('@','')}`;
+                wrap.style.display = 'block';
             }
         }
 
         function generateLink() {
             const user = document.getElementById('username').value.trim().replace('@', '');
             if(user) {
-                const baseUrl = window.location.origin + window.location.pathname.replace('index.html', '');
+                // GitHub Pages Path Fix
+                const loc = window.location;
+                const path = loc.pathname.substring(0, loc.pathname.lastIndexOf('/') + 1);
+                const baseUrl = loc.origin + path;
+                
                 const fullLink = baseUrl + "send.html?u=" + user;
                 const adminLink = baseUrl + "admin.html?u=" + user;
                 
                 document.getElementById('my-link').innerText = fullLink;
                 document.getElementById('admin-link').href = adminLink;
                 document.getElementById('link-display').style.display = 'block';
-            } else { alert("Please enter ID"); }
+            } else { alert("ID உள்ளிடவும்!"); }
         }
 
         function copyLink() {
@@ -70,11 +71,9 @@
             alert("Copied! ✅");
         }
 
-        async function shareLink() {
+        function shareWA() {
             const link = document.getElementById('my-link').innerText;
-            if (navigator.share) {
-                navigator.share({ title: 'NGL Secret Message', text: 'எனக்குத் தெரியாமல் மெசேஜ் அனுப்புங்கள்!', url: link });
-            } else { alert("Sharing not supported, please copy the link."); }
+            window.open(`https://wa.me/?text=எனக்குத் தெரியாமல் ரகசிய மெசேஜ் அனுப்புங்கள்! 👇%0A${link}`);
         }
     </script>
 </body>
