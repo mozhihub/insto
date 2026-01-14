@@ -31,34 +31,33 @@
     </div>
 
     <script>
-        // 1. Firebase Initialize
         const firebaseConfig = { 
             apiKey: "AIzaSyBLyf_dz6xPC9wdthZSVtpatkc8JgFhE4Q", 
             databaseURL: "https://chatbox-chats-default-rtdb.firebaseio.com" 
         };
         
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
         const params = new URLSearchParams(window.location.search);
-        const user = params.get('u') || "Anonymous";
-        document.getElementById('user-display').innerText = "@" + user;
-        document.getElementById('p-img').src = `https://unavatar.io/instagram/${user}`;
+        const rawUser = params.get('u') || "Anonymous";
+        
+        // Firebase-க்காக Username-ல் உள்ள புள்ளியை நீக்குகிறோம் (உதாரணம்: kavin.199 -> kavin199)
+        // இது டேட்டாபேஸில் பிழை ஏற்படாமல் தடுக்கும்
+        const safeUser = rawUser.replace(/[.$#[\]/]/g, ""); 
 
-        // 2. Glitter Celebration
+        document.getElementById('user-display').innerText = "@" + rawUser;
+        document.getElementById('p-img').src = `https://unavatar.io/instagram/${rawUser}`;
+
         function celebrate() {
             var end = Date.now() + (3 * 1000);
             var colors = ['#ff0050', '#00ff88', '#ffffff'];
-
             (function frame() {
                 confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: colors });
                 confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: colors });
-                if (Date.now() < end) { requestAnimationFrame(frame); }
+                if (Date.now() < end) requestAnimationFrame(frame);
             }());
         }
 
-        // 3. Optimized Send Function
         function sendNGL() {
             const msgInput = document.getElementById('message');
             const msg = msgInput.value.trim();
@@ -70,24 +69,22 @@
             btn.disabled = true;
             btn.innerText = "Sending...";
 
-            // .push() பங்க்ஷனை ஒரு வேரியபிளில் எடுத்து இயக்குகிறோம் (More stable)
-            const dbRef = firebase.database().ref('users/' + user + '/messages');
+            // safeUser-ஐ பயன்படுத்தி டேட்டா சேமிக்கிறோம்
+            const dbRef = firebase.database().ref('users/' + safeUser + '/messages');
             
             dbRef.push({
                 text: msg,
                 timestamp: Date.now()
             }, function(error) {
                 if (error) {
-                    alert("Error: " + error.message);
+                    alert("பிழை: " + error.message);
                     btn.disabled = false;
                     btn.innerText = "SEND NOW 🚀";
                 } else {
-                    // Success!
                     celebrate();
                     statusMsg.style.display = "block";
                     msgInput.value = "";
                     btn.innerText = "Sent! ✅";
-                    
                     setTimeout(() => {
                         btn.disabled = false;
                         btn.innerText = "SEND NOW 🚀";
