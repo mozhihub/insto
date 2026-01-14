@@ -9,11 +9,15 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <style>
         body { margin: 0; font-family: sans-serif; background: #000; display: flex; align-items: center; justify-content: center; height: 100vh; color: #fff; overflow: hidden; }
-        .bg-glow { position: absolute; width: 300px; height: 300px; background: #ff0050; filter: blur(120px); opacity: 0.3; z-index: -1; }
-        .card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); padding: 40px 25px; border-radius: 35px; width: 90%; max-width: 380px; text-align: center; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
-        .profile-img { width: 90px; height: 90px; border-radius: 50%; border: 3px solid #ff0050; margin-top: -85px; background: #111; object-fit: cover; }
-        textarea { width: 100%; height: 150px; background: rgba(0,0,0,0.3); border: 1px solid #333; color: white; padding: 20px; border-radius: 20px; margin: 20px 0; outline: none; resize: none; box-sizing: border-box; font-size: 16px; }
-        button { background: #fff; color: #000; border: none; padding: 18px; border-radius: 50px; font-weight: bold; width: 100%; cursor: pointer; font-size: 16px; transition: 0.3s; }
+        .bg-glow { position: absolute; width: 350px; height: 350px; background: #ff0050; filter: blur(120px); opacity: 0.25; z-index: -1; }
+        .card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(25px); padding: 40px 25px; border-radius: 40px; width: 90%; max-width: 380px; text-align: center; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 25px 50px rgba(0,0,0,0.6); animation: slideUp 0.6s ease; }
+        .profile-img { width: 100px; height: 100px; border-radius: 50%; border: 4px solid #ff0050; margin-top: -90px; background: #111; box-shadow: 0 10px 25px rgba(255,0,80,0.3); object-fit: cover; }
+        h2 { margin: 15px 0 5px; font-size: 24px; color: #fff; }
+        textarea { width: 100%; height: 160px; background: rgba(0,0,0,0.4); border: 1.5px solid #333; color: white; padding: 20px; border-radius: 25px; margin: 20px 0; outline: none; resize: none; box-sizing: border-box; font-size: 16px; transition: 0.3s; }
+        textarea:focus { border-color: #ff0050; background: rgba(0,0,0,0.6); }
+        button { background: #fff; color: #000; border: none; padding: 18px; border-radius: 50px; font-weight: bold; width: 100%; cursor: pointer; font-size: 18px; transition: 0.3s; box-shadow: 0 5px 15px rgba(255,255,255,0.2); }
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -21,9 +25,9 @@
     <div class="card">
         <img id="p-img" class="profile-img" src="" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3135/3135715.png'">
         <h2 id="user-display">@Loading...</h2>
-        <p style="color:#aaa; font-size: 14px;">ரகசியமாக ஏதேனும் சொல்லுங்கள்...</p>
+        <p style="color:#ccc; font-size: 14px;">எனக்குத் தெரியாமல் ரகசியமாகச் சொல்லுங்கள்...</p>
         <textarea id="message" placeholder="Type your secret message here..."></textarea>
-        <button id="s-btn" onclick="sendNGL()">SEND NOW 🚀</button>
+        <button id="send-btn" onclick="sendNGL()">SEND NOW 🚀</button>
     </div>
 
     <script>
@@ -31,17 +35,17 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        const params = new URLSearchParams(window.location.search);
-        const user = params.get('u') || "Anonymous";
-        
+        const user = new URLSearchParams(window.location.search).get('u') || "Anonymous";
         document.getElementById('user-display').innerText = "@" + user;
         document.getElementById('p-img').src = `https://unavatar.io/instagram/${user}`;
 
         function sendNGL() {
             const msg = document.getElementById('message').value.trim();
-            const btn = document.getElementById('s-btn');
+            const btn = document.getElementById('send-btn');
             if(msg) {
-                btn.disabled = true; btn.innerText = "Sending...";
+                btn.disabled = true;
+                btn.innerText = "Sending...";
+                
                 db.ref('users/' + user + '/messages').push({ 
                     text: msg, 
                     timestamp: firebase.database.ServerValue.TIMESTAMP 
@@ -50,12 +54,10 @@
                     confetti(); 
                     alert("Sent! ✅"); 
                     document.getElementById('message').value = ""; 
-                    btn.disabled = false; btn.innerText = "SEND NOW 🚀";
-                })
-                .catch(e => {
-                    alert("Error: " + e.message);
                     btn.disabled = false;
-                });
+                    btn.innerText = "SEND NOW 🚀";
+                })
+                .catch(e => { alert("Error: " + e.message); btn.disabled = false; });
             }
         }
     </script>
