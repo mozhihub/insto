@@ -7,17 +7,17 @@
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #000; color: white; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
         .container { text-align: center; background: rgba(255,255,255,0.1); padding: 40px 20px; border-radius: 30px; width: 90%; max-width: 400px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
-        input { width: 100%; padding: 15px; border-radius: 15px; border: none; margin: 20px 0; font-size: 16px; text-align: center; outline: none; }
+        input { width: 100%; padding: 15px; border-radius: 15px; border: none; margin: 20px 0; font-size: 16px; text-align: center; outline: none; box-sizing: border-box; }
         button { background: #ff0050; color: white; border: none; padding: 15px; border-radius: 50px; font-weight: bold; cursor: pointer; width: 100%; font-size: 18px; transition: 0.3s; }
         #link-display { margin-top: 20px; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 15px; display: none; word-break: break-all; }
-        .btn-copy { background: #0095f6; margin-top: 10px; font-size: 14px; padding: 10px; }
+        .btn-copy { background: #0095f6; margin-top: 10px; font-size: 14px; padding: 10px; border-radius: 50px; color: white; border: none; width: 100%; cursor: pointer; }
         .btn-admin { background: #333; margin-top: 10px; font-size: 14px; padding: 10px; text-decoration: none; display: block; color: white; border-radius: 50px; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>NGL Generator 🚀</h1>
-        <p>உங்கள் Insta ID-ஐ உள்ளிட்டு சொந்த லிங்க்கை உருவாக்குங்கள்!</p>
+        <p>உங்கள் Insta ID-ஐ உள்ளிட்டு லிங்க் உருவாக்குங்கள்!</p>
         <input type="text" id="username" placeholder="Enter Instagram Username">
         <button onclick="generateLink()">லிங்க் உருவாக்கு!</button>
 
@@ -34,9 +34,14 @@
         function generateLink() {
             const user = document.getElementById('username').value.trim();
             if(user) {
-                const baseUrl = window.location.href.split('index.html')[0];
-                const fullLink = baseUrl + "send.html?u=" + user;
-                const adminLink = baseUrl + "admin.html?u=" + user;
+                // Current Path-ஐ சரியாகக் கண்டறியும் முறை
+                const currentPath = window.location.pathname.includes('index.html') 
+                                    ? window.location.pathname.replace('index.html', '') 
+                                    : window.location.pathname;
+                const baseUrl = window.location.origin + currentPath;
+                
+                const fullLink = baseUrl + (baseUrl.endsWith('/') ? '' : '/') + "send.html?u=" + user;
+                const adminLink = baseUrl + (baseUrl.endsWith('/') ? '' : '/') + "admin.html?u=" + user;
                 
                 document.getElementById('my-link').innerText = fullLink;
                 document.getElementById('admin-link').href = adminLink;
@@ -47,8 +52,9 @@
         }
         function copyLink() {
             const link = document.getElementById('my-link').innerText;
-            navigator.clipboard.writeText(link);
-            alert("Copied! ✅");
+            navigator.clipboard.writeText(link).then(() => {
+                alert("Copied! ✅");
+            });
         }
     </script>
 </body>
