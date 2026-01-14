@@ -9,44 +9,45 @@
     <style>
         body { background: #000; color: #fff; font-family: sans-serif; padding: 20px; }
         .header { display: flex; justify-content: space-between; align-items: center; max-width: 500px; margin: 0 auto 30px; }
-        .card { background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); border-radius: 25px; padding: 25px; margin: 15px auto; max-width: 500px; position: relative; animation: slideUp 0.4s ease; }
-        .card:nth-child(even) { background: linear-gradient(135deg, #ff0050 0%, #ff00c8 100%); }
-        .msg { font-size: 1.2rem; font-weight: bold; line-height: 1.4; margin-bottom: 10px; }
-        .time { font-size: 0.7rem; opacity: 0.7; }
-        .del-btn { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.2); border: none; color: white; padding: 5px 10px; border-radius: 10px; cursor: pointer; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .card { background: linear-gradient(135deg, #ff0050 0%, #ff00c8 100%); border-radius: 25px; padding: 25px; margin: 15px auto; max-width: 500px; position: relative; animation: slideUp 0.4s ease; box-shadow: 0 10px 20px rgba(255,0,80,0.3); }
+        .msg { font-size: 1.3rem; font-weight: bold; line-height: 1.4; margin-bottom: 10px; }
+        .time { font-size: 0.7rem; opacity: 0.8; }
+        .del-btn { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.3); border: none; color: white; padding: 5px 10px; border-radius: 10px; cursor: pointer; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; } }
     </style>
 </head>
 <body>
     <div class="header">
         <h2 id="title">Inbox</h2>
-        <a href="index.html" style="color: #0095f6; text-decoration: none;">New Link</a>
+        <a href="index.html" style="color: #0095f6; text-decoration: none; font-weight: bold;">Logout</a>
     </div>
     <div id="list"></div>
 
     <script>
         const firebaseConfig = { apiKey: "AIzaSyBLyf_dz6xPC9wdthZSVtpatkc8JgFhE4Q", databaseURL: "https://chatbox-chats-default-rtdb.firebaseio.com" };
-        firebase.initializeApp(firebaseConfig);
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
         const user = new URLSearchParams(window.location.search).get('u');
 
         if(user) {
             document.getElementById('title').innerText = `@${user} Inbox`;
-            firebase.database().ref('users/'+user+'/messages').on('value', snap => {
+            db.ref('users/'+user+'/messages').on('value', snap => {
                 const list = document.getElementById('list');
                 list.innerHTML = "";
                 const data = snap.val();
                 if(data) {
                     Object.keys(data).reverse().forEach(k => {
+                        const date = new Date(data[k].timestamp).toLocaleString();
                         list.innerHTML += `<div class="card">
                             <button class="del-btn" onclick="deleteMsg('${k}')">✕</button>
                             <div class="msg">"${data[k].text}"</div>
-                            <div class="time">${new Date(data[k].timestamp).toLocaleString()}</div>
+                            <div class="time">${date}</div>
                         </div>`;
                     });
                 } else { list.innerHTML = "<p align='center'>No messages yet.</p>"; }
             });
         }
-        function deleteMsg(k) { if(confirm("Delete?")) firebase.database().ref('users/'+user+'/messages/'+k).remove(); }
+        function deleteMsg(k) { if(confirm("Delete?")) db.ref('users/'+user+'/messages/'+k).remove(); }
     </script>
 </body>
 </html>
